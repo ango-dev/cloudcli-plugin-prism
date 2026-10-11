@@ -43,7 +43,12 @@ interface ReportCache {
 
 // ── Constants ──────────────────────────────────────────────────────────
 
-const MONO = "'JetBrains Mono', 'Fira Code', ui-monospace, monospace";
+// Font stacks match the CloudCLI host, which already loads these faces.
+// Font stacks match the CloudCLI host, which already loads these faces.
+// Single quotes only: these are interpolated into style="..." attributes.
+const SANS = "Geist, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif";
+const MONO = "'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace";
+const SERIF = "'Source Serif 4', Georgia, Cambria, 'Times New Roman', serif";
 
 const DIMENSIONS: [string, string][] = [
   ['token_efficiency', 'token efficiency'],
@@ -55,53 +60,125 @@ const DIMENSIONS: [string, string][] = [
 
 // ── Theme helpers ──────────────────────────────────────────────────────
 
+// Every colour resolves through a --prism-* variable defined in THEME_CSS,
+// which reads the host's HSL-triplet variables (hsl(var(--background))) and
+// falls back to the host's default values when a variable is missing. The
+// --prism- prefix keeps these from shadowing the host's own variables.
+
 interface ThemeColors {
   bg: string;
   surface: string;
+  sunken: string;
   border: string;
+  track: string;
   text: string;
   muted: string;
   accent: string;
   dim: string;
+  link: string;
+  success: string;
+  info: string;
+  warning: string;
+  caution: string;
+  danger: string;
 }
 
-function themeColors(dark: boolean): ThemeColors {
-  return dark
-    ? {
-        bg: '#08080f',
-        surface: '#0e0e1a',
-        border: '#1a1a2c',
-        text: '#e2e0f0',
-        muted: '#52507a',
-        accent: '#fbbf24',
-        dim: 'rgba(251,191,36,0.1)',
-      }
-    : {
-        bg: '#fafaf9',
-        surface: '#ffffff',
-        border: '#e8e6f0',
-        text: '#0f0e1a',
-        muted: '#9490b0',
-        accent: '#d97706',
-        dim: 'rgba(217,119,6,0.08)',
-      };
+const COLORS: ThemeColors = {
+  bg: 'var(--prism-bg)',
+  surface: 'var(--prism-surface)',
+  sunken: 'var(--prism-sunken)',
+  border: 'var(--prism-border)',
+  track: 'var(--prism-track)',
+  text: 'var(--prism-text)',
+  muted: 'var(--prism-muted)',
+  accent: 'var(--prism-accent)',
+  dim: 'var(--prism-dim)',
+  link: 'var(--prism-link)',
+  success: 'var(--prism-success)',
+  info: 'var(--prism-info)',
+  warning: 'var(--prism-warning)',
+  caution: 'var(--prism-caution)',
+  danger: 'var(--prism-danger)',
+};
+
+const RADIUS = 'var(--prism-radius)';
+const RADIUS_MD = 'calc(var(--prism-radius) - 2px)';
+const RADIUS_SM = 'calc(var(--prism-radius) - 4px)';
+
+// Host fallbacks per mode; the plugin root carries data-theme from ctx.theme.
+// Status hues (success/info/warning/caution) have no host variable, so they
+// are tuned here to keep at least 4.5:1 against --card and --background.
+const THEME_CSS = `
+  .prism-root {
+    --prism-bg: hsl(var(--background, 60 14% 99%));
+    --prism-surface: hsl(var(--card, 0 0% 100%));
+    --prism-sunken: hsl(var(--muted, 60 3% 94%));
+    --prism-border: hsl(var(--border, 60 2% 88%));
+    --prism-track: hsl(var(--muted-foreground, 50 3% 41%) / 0.2);
+    --prism-text: hsl(var(--foreground, 60 3% 8%));
+    --prism-muted: hsl(var(--muted-foreground, 50 3% 41%));
+    --prism-accent: hsl(var(--primary, 15 58% 43%));
+    --prism-dim: hsl(var(--primary, 15 58% 43%) / 0.08);
+    --prism-ring: hsl(var(--ring, 15 56% 52%));
+    --prism-link: hsl(var(--link, 218 61% 44%));
+    --prism-danger: hsl(var(--destructive, 4 59% 44%));
+    --prism-success: hsl(152 60% 28%);
+    --prism-info: hsl(192 80% 29%);
+    --prism-warning: hsl(36 90% 32%);
+    --prism-caution: hsl(22 80% 38%);
+    --prism-radius: var(--radius, 0.625rem);
+  }
+  .prism-root[data-theme="dark"] {
+    --prism-bg: hsl(var(--background, 0 0% 8%));
+    --prism-surface: hsl(var(--card, 60 2% 12%));
+    --prism-sunken: hsl(var(--muted, 0 0% 13%));
+    --prism-border: hsl(var(--border, 30 2% 18%));
+    --prism-track: hsl(var(--muted-foreground, 45 4% 56%) / 0.22);
+    --prism-text: hsl(var(--foreground, 45 12% 93%));
+    --prism-muted: hsl(var(--muted-foreground, 45 4% 56%));
+    --prism-accent: hsl(var(--primary, 15 65% 63%));
+    --prism-dim: hsl(var(--primary, 15 65% 63%) / 0.12);
+    --prism-ring: hsl(var(--ring, 15 65% 63%));
+    --prism-link: hsl(var(--link, 217 89% 76%));
+    --prism-danger: hsl(var(--destructive, 10 72% 67%));
+    --prism-success: hsl(150 45% 58%);
+    --prism-info: hsl(190 55% 60%);
+    --prism-warning: hsl(40 75% 60%);
+    --prism-caution: hsl(24 80% 66%);
+  }
+  .prism-refresh {
+    flex-shrink: 0; margin-left: 16px; padding: 5px 12px;
+    background: transparent; border: 1px solid var(--prism-border);
+    color: var(--prism-muted); font-family: ${SANS}; font-size: 0.72rem; font-weight: 500;
+    border-radius: ${RADIUS_MD}; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .prism-refresh:hover { border-color: var(--prism-accent); color: var(--prism-accent); background: var(--prism-dim); }
+  .prism-refresh:focus-visible { outline: 2px solid var(--prism-ring); outline-offset: 2px; }
+  .prism-link { color: var(--prism-link); text-decoration: none; }
+  .prism-link:hover { text-decoration: underline; }
+  .prism-link:focus-visible { outline: 2px solid var(--prism-ring); outline-offset: 2px; border-radius: ${RADIUS_SM}; }
+`;
+
+function themeColors(): ThemeColors {
+  return COLORS;
 }
 
 function gradeColor(grade: string, c: ThemeColors): string {
   switch (grade.charAt(0)) {
-    case 'A': return '#10b981';
-    case 'B': return '#22d3ee';
-    case 'C': return '#f59e0b';
-    case 'D': return '#fb923c';
-    case 'F': return '#f43f5e';
+    case 'A': return c.success;
+    case 'B': return c.info;
+    case 'C': return c.warning;
+    case 'D': return c.caution;
+    case 'F': return c.danger;
     default: return c.muted; // N/A
   }
 }
 
 function severityColor(severity: string, c: ThemeColors): string {
   switch (severity.toLowerCase()) {
-    case 'high': return '#f43f5e';
-    case 'medium': return '#f59e0b';
+    case 'high': return c.danger;
+    case 'medium': return c.warning;
     default: return c.muted;
   }
 }
@@ -117,13 +194,7 @@ function esc(s: string): string {
 }
 
 function ensureAssets(): void {
-  if (document.getElementById('prism-font')) return;
-
-  const link = document.createElement('link');
-  link.id = 'prism-font';
-  link.rel = 'stylesheet';
-  link.href = 'https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap';
-  document.head.appendChild(link);
+  if (document.getElementById('prism-styles')) return;
 
   const s = document.createElement('style');
   s.id = 'prism-styles';
@@ -134,6 +205,7 @@ function ensureAssets(): void {
     .prism-bar  { animation: prism-grow   0.75s cubic-bezier(.16,1,.3,1) both }
     .prism-up   { animation: prism-fadeup 0.4s  ease both }
     .prism-skel { animation: prism-pulse  1.6s  ease infinite }
+    ${THEME_CSS}
   `;
   document.head.appendChild(s);
 }
@@ -143,7 +215,7 @@ function skeletonRows(c: ThemeColors, widths: number[]): string {
     .map(
       (w, i) => `
     <div class="prism-skel" style="
-      height:10px;width:${w}%;background:${c.muted};border-radius:2px;
+      height:10px;width:${w}%;background:${c.muted};border-radius:${RADIUS_SM};
       margin-bottom:8px;animation-delay:${i * 0.1}s
     "></div>`,
     )
@@ -155,18 +227,18 @@ function gradeChip(grade: string, c: ThemeColors): string {
   return `
     <span style="
       display:inline-block;min-width:30px;text-align:center;
-      padding:2px 7px;border:1px solid ${color};border-radius:3px;
-      color:${color};font-size:0.7rem;font-weight:700;letter-spacing:0.04em;
+      padding:2px 7px;border:1px solid ${color};border-radius:${RADIUS_SM};
+      color:${color};font-family:${MONO};font-size:0.7rem;font-weight:600;letter-spacing:0.04em;
     ">${esc(grade)}</span>`;
 }
 
 function scoreBar(score: number, grade: string, c: ThemeColors, delay: number): string {
   const width = Math.max(0, Math.min(100, Math.round(score)));
   return `
-    <div style="flex:1;height:4px;background:${c.border};border-radius:1px;overflow:hidden">
+    <div style="flex:1;height:4px;background:${c.track};border-radius:${RADIUS};overflow:hidden">
       <div class="prism-bar" style="
         height:100%;width:${width}%;background:${gradeColor(grade, c)};
-        animation-delay:${delay}s;border-radius:1px;
+        animation-delay:${delay}s;border-radius:${RADIUS};
       "></div>
     </div>`;
 }
@@ -179,58 +251,62 @@ export function mount(container: HTMLElement, api: PluginAPI): void {
   let health: Health | null = null;
 
   const root = document.createElement('div');
+  root.className = 'prism-root';
   Object.assign(root.style, {
     height: '100%',
     overflowY: 'auto',
     boxSizing: 'border-box',
     padding: '24px',
-    fontFamily: MONO,
+    fontFamily: SANS,
   });
   container.appendChild(root);
 
-  function renderNotInstalled(ctx: PluginContext): void {
-    const c = themeColors(ctx.theme === 'dark');
+  function paint(ctx: PluginContext): void {
+    const c = themeColors();
+    root.dataset.theme = ctx.theme === 'dark' ? 'dark' : 'light';
     root.style.background = c.bg;
     root.style.color = c.text;
+  }
+
+  function renderNotInstalled(ctx: PluginContext): void {
+    const c = themeColors();
+    paint(ctx);
     root.innerHTML = `
       <div class="prism-up" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60%;gap:16px">
-        <pre style="font-size:0.75rem;color:${c.muted};opacity:0.6;line-height:1.6;text-align:center">$ prism
+        <pre style="font-family:${MONO};font-size:0.75rem;color:${c.muted};line-height:1.6;text-align:center;margin:0">$ prism
 command not found</pre>
-        <div style="font-size:0.72rem;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase">prism is not installed</div>
+        <div style="font-size:0.72rem;font-weight:500;color:${c.muted};letter-spacing:0.08em;text-transform:uppercase">prism is not installed</div>
         <div style="
-          background:${c.surface};border:1px solid ${c.border};border-radius:3px;
-          padding:12px 18px;font-size:0.78rem;color:${c.text};
+          background:${c.sunken};border:1px solid ${c.border};border-radius:${RADIUS_MD};
+          padding:12px 18px;font-family:${MONO};font-size:0.78rem;color:${c.text};
         ">pip install prism-cc</div>
-        <a href="https://github.com/jakeefr/prism" target="_blank" rel="noreferrer" style="
-          font-size:0.7rem;color:${c.accent};text-decoration:none;
-        ">github.com/jakeefr/prism →</a>
+        <a class="prism-link" href="https://github.com/jakeefr/prism" target="_blank" rel="noreferrer" style="font-size:0.74rem">github.com/jakeefr/prism →</a>
       </div>`;
   }
 
   function renderError(ctx: PluginContext, message: string): void {
-    const c = themeColors(ctx.theme === 'dark');
-    root.style.background = c.bg;
+    const c = themeColors();
+    paint(ctx);
     root.innerHTML = `
-      <div style="padding:24px;font-size:0.78rem;color:${c.accent};opacity:0.8;font-family:${MONO}">
+      <div style="padding:24px;font-size:0.78rem;color:${c.danger};font-family:${MONO}">
         ✗ ${esc(message)}
       </div>`;
   }
 
   function renderLoading(ctx: PluginContext): void {
-    const c = themeColors(ctx.theme === 'dark');
-    root.style.background = c.bg;
-    root.style.color = c.text;
+    const c = themeColors();
+    paint(ctx);
     const title = ctx.project ? esc(ctx.project.name) : 'all projects';
     const subtitle = ctx.project ? esc(ctx.project.path) : 'session health overview';
     root.innerHTML = `
       <div style="margin-bottom:24px">
-        <div style="font-size:1.3rem;font-weight:700">${title}<span style="color:${c.accent}">▌</span></div>
-        <div style="font-size:0.7rem;color:${c.muted};margin-top:4px">${subtitle}</div>
+        <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600">${title}<span style="color:${c.accent}">▌</span></div>
+        <div style="font-family:${MONO};font-size:0.7rem;color:${c.muted};margin-top:4px">${subtitle}</div>
       </div>
-      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:3px;padding:18px;margin-bottom:12px">
+      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS};padding:18px;margin-bottom:12px">
         ${skeletonRows(c, [30, 70, 55, 62, 48, 40])}
       </div>
-      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:3px;padding:18px">
+      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS};padding:18px">
         ${skeletonRows(c, [80, 65, 50])}
       </div>`;
   }
@@ -239,28 +315,20 @@ command not found</pre>
     return `
       <div class="prism-up" style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
         <div style="min-width:0;flex:1">
-          <div style="font-size:1.3rem;font-weight:700;letter-spacing:-0.02em;word-break:break-all">
+          <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600;letter-spacing:-0.01em;word-break:break-all">
             ${title}<span style="color:${c.accent}">▌</span>
           </div>
-          <div style="font-size:0.7rem;color:${c.muted};margin-top:4px;word-break:break-all">${subtitle}</div>
+          <div style="font-family:${MONO};font-size:0.7rem;color:${c.muted};margin-top:4px;word-break:break-all">${subtitle}</div>
         </div>
-        <button id="prism-refresh" style="
-          flex-shrink:0;margin-left:16px;padding:5px 12px;
-          background:transparent;border:1px solid ${c.border};
-          color:${c.muted};font-family:${MONO};font-size:0.7rem;
-          border-radius:3px;cursor:pointer;letter-spacing:0.05em;
-          transition:all 0.15s;
-        " onmouseover="this.style.borderColor='${c.accent}';this.style.color='${c.accent}'"
-           onmouseout="this.style.borderColor='${c.border}';this.style.color='${c.muted}'">
+        <button id="prism-refresh" class="prism-refresh">
           ↻ refresh
         </button>
       </div>`;
   }
 
   function renderReport(ctx: PluginContext, report: Report): void {
-    const c = themeColors(ctx.theme === 'dark');
-    root.style.background = c.bg;
-    root.style.color = c.text;
+    const c = themeColors();
+    paint(ctx);
     const overallColor = gradeColor(report.overall_grade, c);
 
     root.innerHTML = `
@@ -269,16 +337,16 @@ command not found</pre>
       <div class="prism-up" style="
         display:flex;align-items:center;gap:20px;
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:3px;padding:20px;margin-bottom:12px;
+        border-radius:${RADIUS};padding:20px;margin-bottom:12px;
       ">
         <div style="
-          font-size:2.6rem;font-weight:700;letter-spacing:-0.04em;line-height:1;
+          font-family:${SERIF};font-size:2.8rem;font-weight:600;letter-spacing:-0.02em;line-height:1;
           color:${overallColor};min-width:74px;text-align:center;
         ">${esc(report.overall_grade)}</div>
         <div style="flex:1">
           <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:${c.muted};margin-bottom:8px">
-            <span style="letter-spacing:0.1em;text-transform:uppercase">overall health</span>
-            <span>${Number(report.overall_score).toFixed(1)} / 100 · ${Number(report.session_count)} session${report.session_count === 1 ? '' : 's'}${health?.version ? ` · prism v${esc(health.version)}` : ''}</span>
+            <span style="font-weight:500;letter-spacing:0.08em;text-transform:uppercase">overall health</span>
+            <span style="font-family:${MONO}">${Number(report.overall_score).toFixed(1)} / 100 · ${Number(report.session_count)} session${report.session_count === 1 ? '' : 's'}${health?.version ? ` · prism v${esc(health.version)}` : ''}</span>
           </div>
           ${scoreBar(report.overall_score, report.overall_grade, c, 0.1)}
         </div>
@@ -286,17 +354,17 @@ command not found</pre>
 
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:3px;padding:18px;margin-bottom:12px;animation-delay:0.08s
+        border-radius:${RADIUS};padding:18px;margin-bottom:12px;animation-delay:0.08s
       ">
-        <div style="font-size:0.62rem;color:${c.muted};letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">dimensions</div>
+        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px">dimensions</div>
         ${DIMENSIONS.map(([key, label], i) => {
           const dim = report.dimensions[key];
           if (!dim) return '';
           return `
           <div class="prism-up" style="display:flex;align-items:center;gap:12px;margin-bottom:9px;animation-delay:${0.12 + i * 0.04}s">
-            <div style="width:160px;font-size:0.68rem;color:${c.muted};flex-shrink:0">${label}</div>
+            <div style="width:160px;font-size:0.72rem;color:${c.muted};flex-shrink:0">${label}</div>
             ${scoreBar(dim.score, dim.grade, c, 0.15 + i * 0.04)}
-            <div style="width:42px;font-size:0.68rem;color:${c.muted};text-align:right;flex-shrink:0">${Number(dim.score).toFixed(0)}</div>
+            <div style="width:42px;font-family:${MONO};font-size:0.68rem;color:${c.muted};text-align:right;flex-shrink:0">${Number(dim.score).toFixed(0)}</div>
             ${gradeChip(dim.grade, c)}
           </div>`;
         }).join('')}
@@ -304,9 +372,9 @@ command not found</pre>
 
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:3px;padding:18px;animation-delay:0.16s
+        border-radius:${RADIUS};padding:18px;animation-delay:0.16s
       ">
-        <div style="font-size:0.62rem;color:${c.muted};letter-spacing:0.12em;text-transform:uppercase;margin-bottom:12px">top issues</div>
+        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">top issues</div>
         ${
           report.top_issues.length === 0
             ? `<div style="font-size:0.72rem;color:${c.muted}">none found</div>`
@@ -315,15 +383,15 @@ command not found</pre>
                   (issue, i) => `
             <div class="prism-up" style="
               display:flex;gap:10px;align-items:baseline;
-              padding:6px 0;border-bottom:1px solid ${c.border};font-size:0.7rem;
+              padding:7px 0;border-bottom:1px solid ${c.border};font-size:0.74rem;line-height:1.5;
               animation-delay:${0.2 + i * 0.04}s;
             ">
               <span style="
-                flex-shrink:0;font-size:0.6rem;font-weight:700;letter-spacing:0.08em;
+                flex-shrink:0;font-size:0.62rem;font-weight:600;letter-spacing:0.08em;
                 text-transform:uppercase;color:${severityColor(issue.severity, c)};
               ">${esc(issue.severity)}</span>
-              <span style="flex-shrink:0;color:${c.muted}">${esc(issue.category)}</span>
-              <span style="opacity:0.85">${esc(issue.description)}</span>
+              <span style="flex-shrink:0;font-family:${MONO};font-size:0.66rem;color:${c.muted}">${esc(issue.category)}</span>
+              <span>${esc(issue.description)}</span>
             </div>`,
                 )
                 .join('')
@@ -338,9 +406,8 @@ command not found</pre>
   }
 
   function renderOverview(ctx: PluginContext, reports: Report[]): void {
-    const c = themeColors(ctx.theme === 'dark');
-    root.style.background = c.bg;
-    root.style.color = c.text;
+    const c = themeColors();
+    paint(ctx);
     const sorted = [...reports].sort((a, b) => a.overall_score - b.overall_score);
 
     root.innerHTML = `
@@ -348,9 +415,9 @@ command not found</pre>
 
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:3px;padding:18px;animation-delay:0.06s
+        border-radius:${RADIUS};padding:18px;animation-delay:0.06s
       ">
-        <div style="font-size:0.62rem;color:${c.muted};letter-spacing:0.12em;text-transform:uppercase;margin-bottom:14px">
+        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px">
           ${sorted.length} project${sorted.length === 1 ? '' : 's'} · worst first
         </div>
         ${
@@ -361,16 +428,16 @@ command not found</pre>
                   (r, i) => `
           <div class="prism-up" style="display:flex;align-items:center;gap:12px;margin-bottom:9px;animation-delay:${0.1 + i * 0.03}s">
             <div style="
-              flex:1;min-width:0;font-size:0.7rem;overflow:hidden;
-              text-overflow:ellipsis;white-space:nowrap;opacity:0.85;
+              flex:1;min-width:0;font-family:${MONO};font-size:0.7rem;overflow:hidden;
+              text-overflow:ellipsis;white-space:nowrap;
             " title="${esc(r.display_name)}">${esc(r.display_name)}</div>
-            <div style="width:70px;font-size:0.66rem;color:${c.muted};text-align:right;flex-shrink:0">
+            <div style="width:70px;font-family:${MONO};font-size:0.66rem;color:${c.muted};text-align:right;flex-shrink:0">
               ${Number(r.session_count)} sess
             </div>
             <div style="width:120px;flex-shrink:0;display:flex">
               ${scoreBar(r.overall_score, r.overall_grade, c, 0.12 + i * 0.03)}
             </div>
-            <div style="width:42px;font-size:0.68rem;color:${c.muted};text-align:right;flex-shrink:0">${Number(r.overall_score).toFixed(0)}</div>
+            <div style="width:42px;font-family:${MONO};font-size:0.68rem;color:${c.muted};text-align:right;flex-shrink:0">${Number(r.overall_score).toFixed(0)}</div>
             ${gradeChip(r.overall_grade, c)}
           </div>`,
                 )
@@ -386,17 +453,16 @@ command not found</pre>
   }
 
   function renderNoData(ctx: PluginContext): void {
-    const c = themeColors(ctx.theme === 'dark');
-    root.style.background = c.bg;
-    root.style.color = c.text;
+    const c = themeColors();
+    paint(ctx);
     root.innerHTML = `
       ${header(ctx, c, esc(ctx.project?.name ?? 'project'), esc(ctx.project?.path ?? ''))}
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:3px;padding:28px 24px;text-align:center;animation-delay:0.06s
+        border-radius:${RADIUS};padding:28px 24px;text-align:center;animation-delay:0.06s
       ">
-        <div style="font-size:0.62rem;color:${c.muted};letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px">no session data</div>
-        <div style="font-size:0.74rem;color:${c.text};opacity:0.85;line-height:1.7">
+        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">no session data</div>
+        <div style="font-size:0.78rem;color:${c.text};line-height:1.7">
           PRISM has no recorded Claude Code sessions for this project yet.<br>
           Run a session here, then hit refresh.
         </div>
