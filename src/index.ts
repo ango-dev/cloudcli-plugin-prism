@@ -300,7 +300,7 @@ command not found</pre>
     const subtitle = ctx.project ? esc(ctx.project.path) : 'session health overview';
     root.innerHTML = `
       <div style="margin-bottom:24px">
-        <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600">${title}<span style="color:${c.accent}">▌</span></div>
+        <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600">${title}</div>
         <div style="font-family:${MONO};font-size:0.7rem;color:${c.muted};margin-top:4px">${subtitle}</div>
       </div>
       <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS};padding:18px;margin-bottom:12px">
@@ -316,7 +316,7 @@ command not found</pre>
       <div class="prism-up" style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
         <div style="min-width:0;flex:1">
           <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600;letter-spacing:-0.01em;word-break:break-all">
-            ${title}<span style="color:${c.accent}">▌</span>
+            ${title}
           </div>
           <div style="font-family:${MONO};font-size:0.7rem;color:${c.muted};margin-top:4px;word-break:break-all">${subtitle}</div>
         </div>
