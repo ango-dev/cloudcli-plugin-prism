@@ -104,11 +104,11 @@ const COLORS: ThemeColors = {
 const RADIUS = 'var(--prism-radius)';
 const RADIUS_MD = 'calc(var(--prism-radius) - 2px)';
 const RADIUS_SM = 'calc(var(--prism-radius) - 4px)';
-// Cards match the host's Card: rounded-xl with its soft shadow-sm.
-const RADIUS_XL = 'calc(var(--prism-radius) + 4px)';
 
-// Lucide's rotate-cw, the icon set the host's own buttons use.
-const REFRESH_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>';
+// Lucide icons, drawn inline so the tab makes no requests of its own.
+// PRISM_ICON matches icon.svg, which the host shows in the tab bar.
+const PRISM_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4 3.5 19h17L12 4Z"/><path d="M2 11.5h4.5"/><path d="M16 10.5l5.5-2"/><path d="M17.5 13.5H22"/><path d="M18.5 16.5l3.5 1.5"/></svg>';
+const REFRESH_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>';
 
 // Host fallbacks per mode; the plugin root carries data-theme from ctx.theme.
 // Status hues (success/info/warning/caution) have no host variable, so they
@@ -133,7 +133,6 @@ const THEME_CSS = `
     --prism-caution: hsl(22 80% 38%);
     --prism-input: hsl(var(--input, 60 1.5% 87.3%));
     --prism-hover: hsl(var(--accent, 48 12.2% 92%));
-    --prism-shadow: 0 1px 2px 0 hsl(var(--shadow-color, 30 6% 15%) / 0.05);
     --prism-radius: var(--radius, 0.625rem);
   }
   .prism-root[data-theme="dark"] {
@@ -155,26 +154,45 @@ const THEME_CSS = `
     --prism-caution: hsl(24 80% 66%);
     --prism-input: hsl(var(--input, 30 1.9% 21.2%));
     --prism-hover: hsl(var(--accent, 0 1.2% 16.7%));
-    --prism-shadow: 0 1px 2px 0 hsl(var(--shadow-color, 0 0% 0%) / 0.05);
   }
-  .prism-refresh {
-    flex-shrink: 0; margin-left: 16px; height: 32px; padding: 0 10px;
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--prism-bg); border: 1px solid var(--prism-input); box-shadow: var(--prism-shadow);
-    color: var(--prism-text); font-family: ${SANS}; font-size: 0.8125rem; font-weight: 500;
-    border-radius: ${RADIUS_MD}; cursor: pointer; transition: background-color 0.15s;
+  .prism-top { position: sticky; top: 0; z-index: 1; background: var(--prism-bg); }
+  .prism-header {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px;
+    padding: 12px 16px; border-bottom: 1px solid color-mix(in srgb, var(--prism-border) 60%, transparent);
   }
-  .prism-refresh svg { width: 14px; height: 14px; flex-shrink: 0; }
-  .prism-refresh:hover { background: var(--prism-hover); }
-  .prism-refresh:active { background: color-mix(in srgb, var(--prism-hover) 80%, transparent); }
-  .prism-refresh:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--prism-ring); }
-  .prism-chip {
-    display: inline-block; max-width: 100%; box-sizing: border-box;
-    padding: 2px 6px; border-radius: ${RADIUS_MD};
-    background: var(--prism-sunken); color: var(--prism-muted);
-    font-family: ${MONO}; font-size: 0.7rem; line-height: 1.35;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: top;
+  .prism-heading { min-width: 0; }
+  .prism-title-row { display: flex; align-items: center; gap: 8px; }
+  .prism-title-row svg { flex: none; width: 16px; height: 16px; color: var(--prism-accent); }
+  .prism-header h2 { margin: 0; font-size: 14px; font-weight: 600; line-height: 20px; }
+  .prism-header p { margin: 2px 0 0; color: var(--prism-muted); font-size: 12px; overflow-wrap: anywhere; }
+  .prism-header p code { font-family: ${MONO}; font-size: 11.5px; }
+  .prism-actions { display: flex; align-items: center; gap: 6px; }
+  .prism-icon-btn {
+    appearance: none; display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; padding: 0; border: 1px solid transparent; background: transparent;
+    color: var(--prism-text); border-radius: ${RADIUS_MD}; cursor: pointer; transition: background-color 0.15s;
   }
+  .prism-icon-btn svg { width: 14px; height: 14px; }
+  .prism-icon-btn:hover { background: var(--prism-hover); }
+  .prism-icon-btn:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--prism-ring); }
+  .prism-icon-btn:disabled { opacity: 0.5; cursor: default; }
+  .prism-refreshing svg { animation: prism-spin 0.8s linear infinite; }
+  .prism-strip {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 4px 16px; padding: 8px 16px;
+    font-size: 12px; color: var(--prism-muted);
+    border-bottom: 1px solid color-mix(in srgb, var(--prism-border) 60%, transparent);
+    background: color-mix(in srgb, var(--prism-sunken) 20%, var(--prism-bg));
+  }
+  .prism-stat b { color: var(--prism-text); font-weight: 600; margin-left: 4px; }
+  .prism-strip-end { margin-left: auto; }
+  .prism-banner {
+    padding: 8px 16px; font-size: 12px; color: var(--prism-danger);
+    border-bottom: 1px solid color-mix(in srgb, var(--prism-danger) 20%, transparent);
+    background: color-mix(in srgb, var(--prism-danger) 10%, var(--prism-bg));
+  }
+  .prism-content { padding: 12px 16px 32px; }
+  @keyframes prism-spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .prism-refreshing svg { animation: none; } }
   .prism-link { color: var(--prism-link); text-decoration: none; }
   .prism-link:hover { text-decoration: underline; }
   .prism-link:focus-visible { outline: 2px solid var(--prism-ring); outline-offset: 2px; border-radius: ${RADIUS_SM}; }
@@ -230,17 +248,9 @@ function ensureAssets(): void {
   document.head.appendChild(s);
 }
 
-// The host passes the project's ID as `name`, so title the page with the
-// project folder's name instead, as the host's own project chip does.
-function projectLabel(project: PluginContext['project'], fallback: string): string {
-  const folder = project?.path.split(/[\\/]/).filter(Boolean).pop();
-  return folder || project?.name || fallback;
-}
-
-function subtitleHtml(c: ThemeColors, subtitle: string, isPath: boolean): string {
-  return isPath
-    ? `<div style="margin-top:6px;min-width:0"><span class="prism-chip" title="${subtitle}">${subtitle}</span></div>`
-    : `<div style="font-size:0.75rem;color:${c.muted};margin-top:4px">${subtitle}</div>`;
+// Home directories shorten to ~, as in the Agents tab.
+function shortPath(path: string): string {
+  return path.replace(/^(\/home\/[^/]+|\/Users\/[^/]+|[A-Za-z]:\\Users\\[^\\]+)/, '~');
 }
 
 function skeletonRows(c: ThemeColors, widths: number[]): string {
@@ -259,9 +269,11 @@ function gradeChip(grade: string, c: ThemeColors): string {
   const color = gradeColor(grade, c);
   return `
     <span style="
-      display:inline-block;min-width:30px;text-align:center;
-      padding:2px 7px;border:1px solid ${color};border-radius:${RADIUS_SM};
-      color:${color};font-family:${MONO};font-size:0.7rem;font-weight:600;letter-spacing:0.04em;
+      display:inline-flex;align-items:center;justify-content:center;min-width:32px;box-sizing:border-box;
+      padding:0 6px;line-height:18px;border-radius:${RADIUS_MD};
+      border:1px solid color-mix(in srgb, ${color} 30%, transparent);
+      background:color-mix(in srgb, ${color} 8%, transparent);
+      color:${color};font-size:11px;font-weight:600;white-space:nowrap;
     ">${esc(grade)}</span>`;
 }
 
@@ -289,7 +301,6 @@ export function mount(container: HTMLElement, api: PluginAPI): void {
     height: '100%',
     overflowY: 'auto',
     boxSizing: 'border-box',
-    padding: '24px',
     fontFamily: SANS,
   });
   container.appendChild(root);
@@ -301,59 +312,95 @@ export function mount(container: HTMLElement, api: PluginAPI): void {
     root.style.color = c.text;
   }
 
+  function subtitle(ctx: PluginContext): string {
+    if (!ctx.project) return 'Session health across all projects · select one for the full report';
+    const path = ctx.project.path;
+    return `Session health for <code title="${esc(path)}">${esc(shortPath(path))}</code>`;
+  }
+
+  // Header bar laid out like the host's Browser tab and the Agents plugin: icon,
+  // title and subtitle on the left, an icon-only refresh on the right, and an
+  // optional strip of counts underneath. It stays put while the content scrolls.
+  function top(
+    ctx: PluginContext,
+    opts: { refresh?: 'idle' | 'busy'; stats?: [string, string, string?][]; end?: string; banner?: string },
+  ): string {
+    const refresh = opts.refresh
+      ? `<button id="prism-refresh" class="prism-icon-btn${opts.refresh === 'busy' ? ' prism-refreshing' : ''}"
+           title="Refresh" aria-label="Refresh"${opts.refresh === 'busy' ? ' disabled' : ''}>${REFRESH_ICON}</button>`
+      : '';
+    const strip = opts.stats
+      ? `<div class="prism-strip">
+          ${opts.stats
+            .map(([label, value, color]) => `<span class="prism-stat">${label}<b${color ? ` style="color:${color}"` : ''}>${value}</b></span>`)
+            .join('')}
+          ${opts.end ? `<span class="prism-strip-end">${opts.end}</span>` : ''}
+        </div>`
+      : '';
+    const banner = opts.banner ? `<div class="prism-banner" role="alert">${opts.banner}</div>` : '';
+    return `
+      <div class="prism-top">
+        <header class="prism-header">
+          <div class="prism-heading">
+            <div class="prism-title-row">${PRISM_ICON}<h2>Prism</h2></div>
+            <p>${subtitle(ctx)}</p>
+          </div>
+          <div class="prism-actions">${refresh}</div>
+        </header>
+        ${strip}${banner}
+      </div>`;
+  }
+
+  function versionLabel(): string {
+    return health?.version ? `prism v${esc(health.version)}` : '';
+  }
+
+  function bindRefresh(): void {
+    root.querySelector('#prism-refresh')?.addEventListener('click', () => {
+      cache = null;
+      load(api.context);
+    });
+  }
+
+  function sectionLabel(c: ThemeColors, text: string): string {
+    return `<div style="font-size:11px;font-weight:500;color:${c.muted};letter-spacing:0.04em;text-transform:uppercase;margin-bottom:12px">${text}</div>`;
+  }
+
+  function card(c: ThemeColors, body: string, extra = ''): string {
+    return `<div class="prism-up" style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS};padding:14px 16px;margin-bottom:12px;${extra}">${body}</div>`;
+  }
+
   function renderNotInstalled(ctx: PluginContext): void {
     const c = themeColors();
     paint(ctx);
     root.innerHTML = `
-      <div class="prism-up" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:60%;gap:16px">
-        <pre style="font-family:${MONO};font-size:0.75rem;color:${c.muted};line-height:1.6;text-align:center;margin:0">$ prism
-command not found</pre>
-        <div style="font-size:0.72rem;font-weight:500;color:${c.muted};letter-spacing:0.08em;text-transform:uppercase">prism is not installed</div>
-        <div style="
-          background:${c.sunken};border:1px solid ${c.border};border-radius:${RADIUS_MD};
-          padding:12px 18px;font-family:${MONO};font-size:0.78rem;color:${c.text};
-        ">pip install prism-cc</div>
-        <a class="prism-link" href="https://github.com/jakeefr/prism" target="_blank" rel="noreferrer" style="font-size:0.74rem">github.com/jakeefr/prism →</a>
+      ${top(ctx, {})}
+      <div class="prism-content">
+        <div class="prism-up" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px;padding:48px 16px">
+          <div style="font-size:14px;font-weight:600">PRISM is not installed</div>
+          <div style="font-size:12px;color:${c.muted}">Install the <code style="font-family:${MONO};font-size:11.5px">prism</code> command, then reopen this tab.</div>
+          <div style="
+            background:${c.sunken};border:1px solid ${c.border};border-radius:${RADIUS_MD};
+            padding:10px 16px;font-family:${MONO};font-size:12px;color:${c.text};
+          ">pip install prism-cc</div>
+          <a class="prism-link" href="https://github.com/jakeefr/prism" target="_blank" rel="noreferrer" style="font-size:12px">github.com/jakeefr/prism →</a>
+        </div>
       </div>`;
   }
 
   function renderError(ctx: PluginContext, message: string): void {
-    const c = themeColors();
     paint(ctx);
-    root.innerHTML = `
-      <div style="padding:24px;font-size:0.78rem;color:${c.danger};font-family:${MONO}">
-        ✗ ${esc(message)}
-      </div>`;
+    root.innerHTML = top(ctx, { banner: esc(message) });
   }
 
   function renderLoading(ctx: PluginContext): void {
     const c = themeColors();
     paint(ctx);
-    const title = ctx.project ? esc(projectLabel(ctx.project, 'project')) : 'all projects';
-    const subtitle = ctx.project ? esc(ctx.project.path) : 'session health overview';
     root.innerHTML = `
-      <div style="margin-bottom:24px">
-        <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600">${title}</div>
-        ${subtitleHtml(c, subtitle, Boolean(ctx.project))}
-      </div>
-      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;margin-bottom:12px">
-        ${skeletonRows(c, [30, 70, 55, 62, 48, 40])}
-      </div>
-      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px">
-        ${skeletonRows(c, [80, 65, 50])}
-      </div>`;
-  }
-
-  function header(ctx: PluginContext, c: ThemeColors, title: string, subtitle: string, isPath = true): string {
-    return `
-      <div class="prism-up" style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
-        <div style="min-width:0;flex:1">
-          <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600;letter-spacing:-0.01em;word-break:break-all">
-            ${title}
-          </div>
-          ${subtitleHtml(c, subtitle, isPath && subtitle !== '')}
-        </div>
-        <button id="prism-refresh" class="prism-refresh">${REFRESH_ICON}Refresh</button>
+      ${top(ctx, { refresh: 'busy', stats: [], end: 'Analyzing sessions…' })}
+      <div class="prism-content">
+        ${card(c, skeletonRows(c, [30, 70, 55, 62, 48, 40]))}
+        ${card(c, skeletonRows(c, [80, 65, 50]))}
       </div>`;
   }
 
@@ -361,147 +408,138 @@ command not found</pre>
     const c = themeColors();
     paint(ctx);
     const overallColor = gradeColor(report.overall_grade, c);
+    const highCount = report.top_issues.filter((i) => i.severity.toLowerCase() === 'high').length;
 
     root.innerHTML = `
-      ${header(ctx, c, esc(projectLabel(ctx.project, report.display_name)), esc(ctx.project?.path ?? report.display_name))}
+      ${top(ctx, {
+        refresh: 'idle',
+        stats: [
+          ['Sessions', String(Number(report.session_count))],
+          ['Score', Number(report.overall_score).toFixed(1)],
+          ['Issues', String(report.top_issues.length)],
+          ['High', String(highCount), highCount > 0 ? c.danger : undefined],
+        ],
+        end: versionLabel(),
+      })}
+      <div class="prism-content">
+        ${card(c, `
+          <div style="display:flex;align-items:center;gap:20px">
+            <div style="
+              font-family:${SERIF};font-size:2.6rem;font-weight:600;letter-spacing:-0.02em;line-height:1;
+              color:${overallColor};min-width:68px;text-align:center;
+            ">${esc(report.overall_grade)}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;justify-content:space-between;gap:12px;font-size:11px;color:${c.muted};margin-bottom:8px">
+                <span style="font-weight:500;letter-spacing:0.04em;text-transform:uppercase">overall health</span>
+                <span style="font-family:${MONO}">${Number(report.overall_score).toFixed(1)} / 100</span>
+              </div>
+              ${scoreBar(report.overall_score, report.overall_grade, c, 0.1)}
+            </div>
+          </div>`)}
 
-      <div class="prism-up" style="
-        display:flex;align-items:center;gap:20px;
-        background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:20px;margin-bottom:12px;
-      ">
-        <div style="
-          font-family:${SERIF};font-size:2.8rem;font-weight:600;letter-spacing:-0.02em;line-height:1;
-          color:${overallColor};min-width:74px;text-align:center;
-        ">${esc(report.overall_grade)}</div>
-        <div style="flex:1">
-          <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:${c.muted};margin-bottom:8px">
-            <span style="font-weight:500;letter-spacing:0.08em;text-transform:uppercase">overall health</span>
-            <span style="font-family:${MONO}">${Number(report.overall_score).toFixed(1)} / 100 · ${Number(report.session_count)} session${report.session_count === 1 ? '' : 's'}${health?.version ? ` · prism v${esc(health.version)}` : ''}</span>
-          </div>
-          ${scoreBar(report.overall_score, report.overall_grade, c, 0.1)}
-        </div>
-      </div>
+        ${card(c, `
+          ${sectionLabel(c, 'dimensions')}
+          ${DIMENSIONS.map(([key, label], i) => {
+            const dim = report.dimensions[key];
+            if (!dim) return '';
+            return `
+            <div class="prism-up" style="display:flex;align-items:center;gap:12px;margin-bottom:9px;animation-delay:${0.12 + i * 0.04}s">
+              <div style="width:160px;font-size:12px;color:${c.muted};flex-shrink:0">${label}</div>
+              ${scoreBar(dim.score, dim.grade, c, 0.15 + i * 0.04)}
+              <div style="width:42px;font-family:${MONO};font-size:11.5px;color:${c.muted};text-align:right;flex-shrink:0">${Number(dim.score).toFixed(0)}</div>
+              ${gradeChip(dim.grade, c)}
+            </div>`;
+          }).join('')}`, 'animation-delay:0.08s')}
 
-      <div class="prism-up" style="
-        background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;margin-bottom:12px;animation-delay:0.08s
-      ">
-        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px">dimensions</div>
-        ${DIMENSIONS.map(([key, label], i) => {
-          const dim = report.dimensions[key];
-          if (!dim) return '';
-          return `
-          <div class="prism-up" style="display:flex;align-items:center;gap:12px;margin-bottom:9px;animation-delay:${0.12 + i * 0.04}s">
-            <div style="width:160px;font-size:0.72rem;color:${c.muted};flex-shrink:0">${label}</div>
-            ${scoreBar(dim.score, dim.grade, c, 0.15 + i * 0.04)}
-            <div style="width:42px;font-family:${MONO};font-size:0.68rem;color:${c.muted};text-align:right;flex-shrink:0">${Number(dim.score).toFixed(0)}</div>
-            ${gradeChip(dim.grade, c)}
-          </div>`;
-        }).join('')}
-      </div>
-
-      <div class="prism-up" style="
-        background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;animation-delay:0.16s
-      ">
-        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">top issues</div>
-        ${
-          report.top_issues.length === 0
-            ? `<div style="font-size:0.72rem;color:${c.muted}">none found</div>`
-            : report.top_issues
-                .map(
-                  (issue, i) => `
-            <div class="prism-up" style="
-              display:flex;gap:10px;align-items:baseline;
-              padding:7px 0;border-bottom:1px solid ${c.border};font-size:0.74rem;line-height:1.5;
-              animation-delay:${0.2 + i * 0.04}s;
-            ">
-              <span style="
-                flex-shrink:0;font-size:0.62rem;font-weight:600;letter-spacing:0.08em;
-                text-transform:uppercase;color:${severityColor(issue.severity, c)};
-              ">${esc(issue.severity)}</span>
-              <span style="flex-shrink:0;font-family:${MONO};font-size:0.66rem;color:${c.muted}">${esc(issue.category)}</span>
-              <span>${esc(issue.description)}</span>
-            </div>`,
-                )
-                .join('')
-        }
+        ${card(c, `
+          ${sectionLabel(c, 'top issues')}
+          ${
+            report.top_issues.length === 0
+              ? `<div style="font-size:12px;color:${c.muted}">none found</div>`
+              : report.top_issues
+                  .map(
+                    (issue, i) => `
+              <div class="prism-up" style="
+                display:flex;gap:10px;align-items:baseline;
+                padding:7px 0;border-top:${i === 0 ? '0' : `1px solid ${c.border}`};font-size:12.5px;line-height:1.5;
+                animation-delay:${0.2 + i * 0.04}s;
+              ">
+                <span style="
+                  flex-shrink:0;font-size:11px;font-weight:600;letter-spacing:0.04em;
+                  text-transform:uppercase;color:${severityColor(issue.severity, c)};
+                ">${esc(issue.severity)}</span>
+                <span style="flex-shrink:0;font-family:${MONO};font-size:11.5px;color:${c.muted}">${esc(issue.category)}</span>
+                <span>${esc(issue.description)}</span>
+              </div>`,
+                  )
+                  .join('')
+          }`, 'animation-delay:0.16s')}
       </div>
     `;
-
-    root.querySelector('#prism-refresh')?.addEventListener('click', () => {
-      cache = null;
-      load(api.context);
-    });
+    bindRefresh();
   }
 
   function renderOverview(ctx: PluginContext, reports: Report[]): void {
     const c = themeColors();
     paint(ctx);
     const sorted = [...reports].sort((a, b) => a.overall_score - b.overall_score);
+    const sessions = reports.reduce((n, r) => n + Number(r.session_count), 0);
+    const attention = reports.filter((r) => /^[DF]/.test(r.overall_grade)).length;
 
     root.innerHTML = `
-      ${header(ctx, c, 'all projects', 'session health overview · select a project for the full report', false)}
-
-      <div class="prism-up" style="
-        background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;animation-delay:0.06s
-      ">
-        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px">
-          ${sorted.length} project${sorted.length === 1 ? '' : 's'} · worst first
-        </div>
-        ${
-          sorted.length === 0
-            ? `<div style="font-size:0.72rem;color:${c.muted}">no projects with session data found</div>`
-            : sorted
-                .map(
-                  (r, i) => `
-          <div class="prism-up" style="display:flex;align-items:center;gap:12px;margin-bottom:9px;animation-delay:${0.1 + i * 0.03}s">
-            <div style="
-              flex:1;min-width:0;font-family:${MONO};font-size:0.7rem;overflow:hidden;
-              text-overflow:ellipsis;white-space:nowrap;
-            " title="${esc(r.display_name)}">${esc(r.display_name)}</div>
-            <div style="width:70px;font-family:${MONO};font-size:0.66rem;color:${c.muted};text-align:right;flex-shrink:0">
-              ${Number(r.session_count)} sess
-            </div>
-            <div style="width:120px;flex-shrink:0;display:flex">
-              ${scoreBar(r.overall_score, r.overall_grade, c, 0.12 + i * 0.03)}
-            </div>
-            <div style="width:42px;font-family:${MONO};font-size:0.68rem;color:${c.muted};text-align:right;flex-shrink:0">${Number(r.overall_score).toFixed(0)}</div>
-            ${gradeChip(r.overall_grade, c)}
-          </div>`,
-                )
-                .join('')
-        }
+      ${top(ctx, {
+        refresh: 'idle',
+        stats: [
+          ['Projects', String(reports.length)],
+          ['Sessions', String(sessions)],
+          ['Need attention', String(attention), attention > 0 ? c.warning : undefined],
+        ],
+        end: versionLabel(),
+      })}
+      <div class="prism-content">
+        ${card(c, `
+          ${sectionLabel(c, 'worst first')}
+          ${
+            sorted.length === 0
+              ? `<div style="font-size:12px;color:${c.muted}">no projects with session data found</div>`
+              : sorted
+                  .map(
+                    (r, i) => `
+            <div class="prism-up" style="display:flex;align-items:center;gap:12px;margin-bottom:9px;animation-delay:${0.1 + i * 0.03}s">
+              <div style="
+                flex:1;min-width:0;font-size:12.5px;font-weight:500;overflow:hidden;
+                text-overflow:ellipsis;white-space:nowrap;
+              " title="${esc(r.display_name)}">${esc(r.display_name)}</div>
+              <div style="width:70px;font-size:12px;color:${c.muted};text-align:right;flex-shrink:0">
+                ${Number(r.session_count)} sess
+              </div>
+              <div style="width:120px;flex-shrink:0;display:flex">
+                ${scoreBar(r.overall_score, r.overall_grade, c, 0.12 + i * 0.03)}
+              </div>
+              <div style="width:42px;font-family:${MONO};font-size:11.5px;color:${c.muted};text-align:right;flex-shrink:0">${Number(r.overall_score).toFixed(0)}</div>
+              ${gradeChip(r.overall_grade, c)}
+            </div>`,
+                  )
+                  .join('')
+          }`, 'animation-delay:0.06s')}
       </div>
     `;
-
-    root.querySelector('#prism-refresh')?.addEventListener('click', () => {
-      cache = null;
-      load(api.context);
-    });
+    bindRefresh();
   }
 
   function renderNoData(ctx: PluginContext): void {
     const c = themeColors();
     paint(ctx);
     root.innerHTML = `
-      ${header(ctx, c, esc(projectLabel(ctx.project, 'project')), esc(ctx.project?.path ?? ''))}
-      <div class="prism-up" style="
-        background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:28px 24px;text-align:center;animation-delay:0.06s
-      ">
-        <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">no session data</div>
-        <div style="font-size:0.78rem;color:${c.text};line-height:1.7">
-          PRISM has no recorded Claude Code sessions for this project yet.<br>
-          Run a session here, then hit refresh.
+      ${top(ctx, { refresh: 'idle', stats: [['Sessions', '0']], end: versionLabel() })}
+      <div class="prism-content">
+        <div class="prism-up" style="text-align:center;padding:48px 16px;color:${c.muted};font-size:12.5px;line-height:1.6">
+          <div style="color:${c.text};font-size:14px;font-weight:600;margin-bottom:4px">No session data yet</div>
+          PRISM has no recorded Claude Code sessions for this project.<br>
+          Run a session here, then refresh.
         </div>
       </div>`;
-    root.querySelector('#prism-refresh')?.addEventListener('click', () => {
-      cache = null;
-      load(api.context);
-    });
+    bindRefresh();
   }
 
   function renderFromCache(ctx: PluginContext): void {
