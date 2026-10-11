@@ -104,57 +104,77 @@ const COLORS: ThemeColors = {
 const RADIUS = 'var(--prism-radius)';
 const RADIUS_MD = 'calc(var(--prism-radius) - 2px)';
 const RADIUS_SM = 'calc(var(--prism-radius) - 4px)';
+// Cards match the host's Card: rounded-xl with its soft shadow-sm.
+const RADIUS_XL = 'calc(var(--prism-radius) + 4px)';
+
+// Lucide's rotate-cw, the icon set the host's own buttons use.
+const REFRESH_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>';
 
 // Host fallbacks per mode; the plugin root carries data-theme from ctx.theme.
 // Status hues (success/info/warning/caution) have no host variable, so they
 // are tuned here to keep at least 4.5:1 against --card and --background.
 const THEME_CSS = `
   .prism-root {
-    --prism-bg: hsl(var(--background, 60 14% 99%));
+    --prism-bg: hsl(var(--background, 60 14.3% 98.6%));
     --prism-surface: hsl(var(--card, 0 0% 100%));
-    --prism-sunken: hsl(var(--muted, 60 3% 94%));
-    --prism-border: hsl(var(--border, 60 2% 88%));
-    --prism-track: hsl(var(--muted-foreground, 50 3% 41%) / 0.2);
-    --prism-text: hsl(var(--foreground, 60 3% 8%));
-    --prism-muted: hsl(var(--muted-foreground, 50 3% 41%));
-    --prism-accent: hsl(var(--primary, 15 58% 43%));
-    --prism-dim: hsl(var(--primary, 15 58% 43%) / 0.08);
-    --prism-ring: hsl(var(--ring, 15 56% 52%));
-    --prism-link: hsl(var(--link, 218 61% 44%));
-    --prism-danger: hsl(var(--destructive, 4 59% 44%));
+    --prism-sunken: hsl(var(--muted, 60 3.2% 93.9%));
+    --prism-border: hsl(var(--border, 60 1.7% 88.4%));
+    --prism-track: hsl(var(--muted-foreground, 50 2.9% 40.8%) / 0.2);
+    --prism-text: hsl(var(--foreground, 60 2.6% 7.6%));
+    --prism-muted: hsl(var(--muted-foreground, 50 2.9% 40.8%));
+    --prism-accent: hsl(var(--primary, 15.5 58.2% 43.1%));
+    --prism-dim: hsl(var(--primary, 15.5 58.2% 43.1%) / 0.08);
+    --prism-ring: hsl(var(--ring, 15.1 55.6% 52.4%));
+    --prism-link: hsl(var(--link, 218.4 61.3% 43.5%));
+    --prism-danger: hsl(var(--destructive, 4.1 59.1% 44.1%));
     --prism-success: hsl(152 60% 28%);
     --prism-info: hsl(192 80% 29%);
     --prism-warning: hsl(36 90% 32%);
     --prism-caution: hsl(22 80% 38%);
+    --prism-input: hsl(var(--input, 60 1.5% 87.3%));
+    --prism-hover: hsl(var(--accent, 48 12.2% 92%));
+    --prism-shadow: 0 1px 2px 0 hsl(var(--shadow-color, 30 6% 15%) / 0.05);
     --prism-radius: var(--radius, 0.625rem);
   }
   .prism-root[data-theme="dark"] {
-    --prism-bg: hsl(var(--background, 0 0% 8%));
-    --prism-surface: hsl(var(--card, 60 2% 12%));
-    --prism-sunken: hsl(var(--muted, 0 0% 13%));
-    --prism-border: hsl(var(--border, 30 2% 18%));
-    --prism-track: hsl(var(--muted-foreground, 45 4% 56%) / 0.22);
-    --prism-text: hsl(var(--foreground, 45 12% 93%));
-    --prism-muted: hsl(var(--muted-foreground, 45 4% 56%));
-    --prism-accent: hsl(var(--primary, 15 65% 63%));
-    --prism-dim: hsl(var(--primary, 15 65% 63%) / 0.12);
-    --prism-ring: hsl(var(--ring, 15 65% 63%));
-    --prism-link: hsl(var(--link, 217 89% 76%));
-    --prism-danger: hsl(var(--destructive, 10 72% 67%));
+    --prism-bg: hsl(var(--background, 0 0% 8.2%));
+    --prism-surface: hsl(var(--card, 60 1.6% 12.4%));
+    --prism-sunken: hsl(var(--muted, 0 0% 12.9%));
+    --prism-border: hsl(var(--border, 0 1.2% 15.9%));
+    --prism-track: hsl(var(--muted-foreground, 45 3.6% 56.1%) / 0.22);
+    --prism-text: hsl(var(--foreground, 45 11.8% 93.3%));
+    --prism-muted: hsl(var(--muted-foreground, 45 3.6% 56.1%));
+    --prism-accent: hsl(var(--primary, 15.2 64.9% 63.1%));
+    --prism-dim: hsl(var(--primary, 15.2 64.9% 63.1%) / 0.12);
+    --prism-ring: hsl(var(--ring, 15.2 64.9% 63.1%));
+    --prism-link: hsl(var(--link, 217.1 88.7% 75.7%));
+    --prism-danger: hsl(var(--destructive, 9.9 72.5% 67.3%));
     --prism-success: hsl(150 45% 58%);
     --prism-info: hsl(190 55% 60%);
     --prism-warning: hsl(40 75% 60%);
     --prism-caution: hsl(24 80% 66%);
+    --prism-input: hsl(var(--input, 30 1.9% 21.2%));
+    --prism-hover: hsl(var(--accent, 0 1.2% 16.7%));
+    --prism-shadow: 0 1px 2px 0 hsl(var(--shadow-color, 0 0% 0%) / 0.05);
   }
   .prism-refresh {
-    flex-shrink: 0; margin-left: 16px; padding: 5px 12px;
-    background: transparent; border: 1px solid var(--prism-border);
-    color: var(--prism-muted); font-family: ${SANS}; font-size: 0.72rem; font-weight: 500;
-    border-radius: ${RADIUS_MD}; cursor: pointer;
-    transition: border-color 0.15s, color 0.15s, background 0.15s;
+    flex-shrink: 0; margin-left: 16px; height: 32px; padding: 0 10px;
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--prism-bg); border: 1px solid var(--prism-input); box-shadow: var(--prism-shadow);
+    color: var(--prism-text); font-family: ${SANS}; font-size: 0.8125rem; font-weight: 500;
+    border-radius: ${RADIUS_MD}; cursor: pointer; transition: background-color 0.15s;
   }
-  .prism-refresh:hover { border-color: var(--prism-accent); color: var(--prism-accent); background: var(--prism-dim); }
-  .prism-refresh:focus-visible { outline: 2px solid var(--prism-ring); outline-offset: 2px; }
+  .prism-refresh svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .prism-refresh:hover { background: var(--prism-hover); }
+  .prism-refresh:active { background: color-mix(in srgb, var(--prism-hover) 80%, transparent); }
+  .prism-refresh:focus-visible { outline: none; box-shadow: 0 0 0 1px var(--prism-ring); }
+  .prism-chip {
+    display: inline-block; max-width: 100%; box-sizing: border-box;
+    padding: 2px 6px; border-radius: ${RADIUS_MD};
+    background: var(--prism-sunken); color: var(--prism-muted);
+    font-family: ${MONO}; font-size: 0.7rem; line-height: 1.35;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: top;
+  }
   .prism-link { color: var(--prism-link); text-decoration: none; }
   .prism-link:hover { text-decoration: underline; }
   .prism-link:focus-visible { outline: 2px solid var(--prism-ring); outline-offset: 2px; border-radius: ${RADIUS_SM}; }
@@ -208,6 +228,19 @@ function ensureAssets(): void {
     ${THEME_CSS}
   `;
   document.head.appendChild(s);
+}
+
+// The host passes the project's ID as `name`, so title the page with the
+// project folder's name instead, as the host's own project chip does.
+function projectLabel(project: PluginContext['project'], fallback: string): string {
+  const folder = project?.path.split(/[\\/]/).filter(Boolean).pop();
+  return folder || project?.name || fallback;
+}
+
+function subtitleHtml(c: ThemeColors, subtitle: string, isPath: boolean): string {
+  return isPath
+    ? `<div style="margin-top:6px;min-width:0"><span class="prism-chip" title="${subtitle}">${subtitle}</span></div>`
+    : `<div style="font-size:0.75rem;color:${c.muted};margin-top:4px">${subtitle}</div>`;
 }
 
 function skeletonRows(c: ThemeColors, widths: number[]): string {
@@ -296,33 +329,31 @@ command not found</pre>
   function renderLoading(ctx: PluginContext): void {
     const c = themeColors();
     paint(ctx);
-    const title = ctx.project ? esc(ctx.project.name) : 'all projects';
+    const title = ctx.project ? esc(projectLabel(ctx.project, 'project')) : 'all projects';
     const subtitle = ctx.project ? esc(ctx.project.path) : 'session health overview';
     root.innerHTML = `
       <div style="margin-bottom:24px">
         <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600">${title}</div>
-        <div style="font-family:${MONO};font-size:0.7rem;color:${c.muted};margin-top:4px">${subtitle}</div>
+        ${subtitleHtml(c, subtitle, Boolean(ctx.project))}
       </div>
-      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS};padding:18px;margin-bottom:12px">
+      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;margin-bottom:12px">
         ${skeletonRows(c, [30, 70, 55, 62, 48, 40])}
       </div>
-      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS};padding:18px">
+      <div style="background:${c.surface};border:1px solid ${c.border};border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px">
         ${skeletonRows(c, [80, 65, 50])}
       </div>`;
   }
 
-  function header(ctx: PluginContext, c: ThemeColors, title: string, subtitle: string): string {
+  function header(ctx: PluginContext, c: ThemeColors, title: string, subtitle: string, isPath = true): string {
     return `
       <div class="prism-up" style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px">
         <div style="min-width:0;flex:1">
           <div style="font-family:${SERIF};font-size:1.45rem;font-weight:600;letter-spacing:-0.01em;word-break:break-all">
             ${title}
           </div>
-          <div style="font-family:${MONO};font-size:0.7rem;color:${c.muted};margin-top:4px;word-break:break-all">${subtitle}</div>
+          ${subtitleHtml(c, subtitle, isPath && subtitle !== '')}
         </div>
-        <button id="prism-refresh" class="prism-refresh">
-          ↻ refresh
-        </button>
+        <button id="prism-refresh" class="prism-refresh">${REFRESH_ICON}Refresh</button>
       </div>`;
   }
 
@@ -332,12 +363,12 @@ command not found</pre>
     const overallColor = gradeColor(report.overall_grade, c);
 
     root.innerHTML = `
-      ${header(ctx, c, esc(ctx.project?.name ?? report.display_name), esc(ctx.project?.path ?? report.display_name))}
+      ${header(ctx, c, esc(projectLabel(ctx.project, report.display_name)), esc(ctx.project?.path ?? report.display_name))}
 
       <div class="prism-up" style="
         display:flex;align-items:center;gap:20px;
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS};padding:20px;margin-bottom:12px;
+        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:20px;margin-bottom:12px;
       ">
         <div style="
           font-family:${SERIF};font-size:2.8rem;font-weight:600;letter-spacing:-0.02em;line-height:1;
@@ -354,7 +385,7 @@ command not found</pre>
 
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS};padding:18px;margin-bottom:12px;animation-delay:0.08s
+        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;margin-bottom:12px;animation-delay:0.08s
       ">
         <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px">dimensions</div>
         ${DIMENSIONS.map(([key, label], i) => {
@@ -372,7 +403,7 @@ command not found</pre>
 
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS};padding:18px;animation-delay:0.16s
+        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;animation-delay:0.16s
       ">
         <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">top issues</div>
         ${
@@ -411,11 +442,11 @@ command not found</pre>
     const sorted = [...reports].sort((a, b) => a.overall_score - b.overall_score);
 
     root.innerHTML = `
-      ${header(ctx, c, 'all projects', 'session health overview · select a project for the full report')}
+      ${header(ctx, c, 'all projects', 'session health overview · select a project for the full report', false)}
 
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS};padding:18px;animation-delay:0.06s
+        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:18px;animation-delay:0.06s
       ">
         <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px">
           ${sorted.length} project${sorted.length === 1 ? '' : 's'} · worst first
@@ -456,10 +487,10 @@ command not found</pre>
     const c = themeColors();
     paint(ctx);
     root.innerHTML = `
-      ${header(ctx, c, esc(ctx.project?.name ?? 'project'), esc(ctx.project?.path ?? ''))}
+      ${header(ctx, c, esc(projectLabel(ctx.project, 'project')), esc(ctx.project?.path ?? ''))}
       <div class="prism-up" style="
         background:${c.surface};border:1px solid ${c.border};
-        border-radius:${RADIUS};padding:28px 24px;text-align:center;animation-delay:0.06s
+        border-radius:${RADIUS_XL};box-shadow:var(--prism-shadow);padding:28px 24px;text-align:center;animation-delay:0.06s
       ">
         <div style="font-size:0.64rem;font-weight:500;color:${c.muted};letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px">no session data</div>
         <div style="font-size:0.78rem;color:${c.text};line-height:1.7">

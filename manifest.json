@@ -1,6 +1,6 @@
 {
   "name": "prism",
-  "displayName": "PRISM",
+  "displayName": "Prism",
   "version": "1.0.0",
   "description": "Post-session health diagnostics for Claude Code sessions: scoring across five dimensions, top issues, and CLAUDE.md adherence, powered by PRISM.",
   "author": "jakeefr",
